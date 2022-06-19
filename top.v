@@ -1,24 +1,34 @@
-/* Copyright 2020 Gregory Davill <greg.davill@gmail.com> */
 `default_nettype none
-
-/*
- *  Blink a LED on the OrangeCrab using verilog
- *  Is able to reset the OrangeCrab by driving rst_n low on btn0 press.
- */
 
 module top (
     input clk48,
 
-    output rgb_led0_r,
-    output rgb_led0_g,
-    output rgb_led0_b,
+    output	rgb_led0_r,
+    output	rgb_led0_g,
+    output	rgb_led0_b,
 
-	output gpio_0,
-	inout  gpio_1,
+    inout	gpio_0, // usb_dp
+    inout 	gpio_1, // usb_dn
 
-    output rst_n,
-    input usr_btn
+    output	rst_n,
+    input	usr_btn
 );
+
+
+    wire usb_tx_se0, usb_tx_j, usb_tx_en;
+    usb usb0(
+		.clk_48(clk48),
+        .rx_j(gpio_0),
+        .rx_se0(!gpio_0 && !gpio_1),
+
+        .tx_se0(usb_tx_se0),
+        .tx_j(usb_tx_j),
+        .tx_en(usb_tx_en));
+
+    assign gpio_0 = usb_tx_en? (usb_tx_se0? 1'b0: usb_tx_j): 1'bz;
+    assign gpio_1 = usb_tx_en? (usb_tx_se0? 1'b0: !usb_tx_j): 1'bz;
+
+
     // Create a 27 bit register
     reg [26:0] counter = 0;
 
@@ -31,8 +41,6 @@ module top (
     assign rgb_led0_r = ~counter[24];
     assign rgb_led0_g = 1'b1; //~counter[25];
     assign rgb_led0_b = 1'b1; //~counter[26];
-	assign gpio_0 = ~counter[24];
-	assign gpio_1 = 1'bz;
 
     // Reset logic on button press.
     // this will enter the bootloader
