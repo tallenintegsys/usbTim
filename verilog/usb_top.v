@@ -21,10 +21,10 @@ reg	[7:0] din;
 wire	[7:0] dout;
 reg	din_valid;
 
-// hello
-reg	hellodone = 0;
-reg	[7:0] helloptr = 22;
-reg 	[7:0] hello [30:0];
+// status
+reg	statusdone = 0;
+reg	[7:0] statusptr = 22;
+reg 	[7:0] status [30:0];
 reg	[7:0] uart_d;
 reg	uart_dv = 0;
 wire	uart_sout;
@@ -78,12 +78,12 @@ always @(posedge clk48) begin
 	if (uart_dv) begin
 		uart_dv <= 1'b0;
 	end else if (!uart_busy) begin
-		if (!hellodone) begin
-			uart_d <= hello[helloptr];
-			helloptr <= helloptr - 1;
+		if (!statusdone) begin
+			uart_d <= status[statusptr];
+			statusptr <= statusptr - 1;
 			uart_dv <= 1'b1;
 			if (uart_d == "\777") begin
-				hellodone <= 1'b1;
+				statusdone <= 1'b1;
 			end
 		end else begin
 			uart_d <= dout;

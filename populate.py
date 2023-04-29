@@ -11,7 +11,7 @@ class v:
     i = 0                                  # the element in the array
 
     def p(char):
-        print("{}[{}] = \"{}\"".format(v.arrayName, v.i, char))
+        print("{}[{}] = \"{}\";".format(v.arrayName, v.i, char))
         v.i += 1
 
 
