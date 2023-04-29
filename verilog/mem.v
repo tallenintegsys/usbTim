@@ -9,7 +9,7 @@ input  wire         en,
 input  wire [10:0]  addr,
 output reg [7:0]   data);
 
-reg  [7:0] mem[0:1024];
+reg  [7:0] mem[0:1023];
 
 always @(posedge clk) begin
 	if (en) begin
