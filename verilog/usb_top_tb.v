@@ -29,9 +29,9 @@ initial begin
 	$dumpfile("usb_top_tb.vcd");
 	$dumpvars(0, uut);
 	#0
-	usr_btn = 1'b0;
+	usr_btn = 1'b1;
 	clk48 = 1'b0;
-	#1000000
+	#1100000
 	$finish;
 end
 

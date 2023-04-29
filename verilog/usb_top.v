@@ -22,9 +22,8 @@ reg	din_valid;
 wire	reset;
 
 // status
-reg	statusdone = 0;
 reg	[7:0] statusptr = 0;
-reg 	[7:0] status [0:110];
+reg 	[7:0] status [0:65536]; //122];
 reg	[7:0] uart_d;
 reg	uart_dv = 0;
 wire	uart_sout;
@@ -33,6 +32,7 @@ wire	uart_done;
 
 initial begin
 `include "status.v"
+status[65535] = "\033";
 end
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
@@ -77,22 +77,16 @@ uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 
 always @(posedge clk48) begin
 	if (reset) begin
-		statusdone <= 1'b0;
 		statusptr <= 0;
 	end else begin
 		if (uart_dv) begin
 			uart_dv <= 1'b0;
 		end else if (!uart_busy) begin
-			if (!statusdone) begin
-				uart_d <= status[statusptr];
-				statusptr <= statusptr + 1;
-				uart_dv <= 1'b1;
-				if (uart_d == "\014") begin
-					statusdone <= 1'b1;
-				end
-			end else begin
-				uart_d <= dout;
-				uart_dv <= 1'b0; // stop sending
+			uart_d <= status[statusptr];
+			statusptr <= statusptr + 1;
+			uart_dv <= 1'b1;
+			if (uart_d == "\014") begin
+				statusptr <= 8'd4; // do it again w/o the erase screen
 			end
 		end
 	end //reset
@@ -101,14 +95,14 @@ end // always
 // Reset logic on button press.
 // this will enter the bootloader
 reg reset_sr = 1'b1;
-reg [23:0] rcount = 24'hffffffffffff;
+reg [23:0] rcount = 24'hffffff;
 always @(posedge clk48) begin
 	if (!usr_btn)
 		rcount <= rcount - 24'b1;
 	else
-		rcount <= 24'hffffffffffff;
+		rcount <= 24'hffffff;
 
-	if (rcount == 24'h000000000000)
+	if (rcount == 24'h000000)
 		reset_sr <= {usr_btn};
 end
 assign rst_n = reset_sr;

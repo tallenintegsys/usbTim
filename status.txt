@@ -1,3 +1,4 @@
+\e[2J\e[1;1H
 Ready
 \e[05mblink\e[00m
 \e[04munderline\e[00m
