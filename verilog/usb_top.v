@@ -22,8 +22,8 @@ reg	din_valid;
 wire	reset;
 
 // status
-reg	[7:0] statusptr = 0;
-reg 	[7:0] status [0:65536]; //122];
+reg	[9:0] statusptr = 0;
+reg 	[7:0] status [0:1023]; // DP16KD
 reg	[7:0] uart_d;
 reg	uart_dv = 0;
 wire	uart_sout;
@@ -32,7 +32,6 @@ wire	uart_done;
 
 initial begin
 `include "status.v"
-status[65535] = "\033";
 end
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing

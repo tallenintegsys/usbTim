@@ -1,45 +1,46 @@
 module usb_annunciator (
-	input tx_en,
-	input tx_j,
-	input tx_se0,
-	input usb_rst,
-	input transaction_active,
-	input [3:0] endpoint,
-	input direction_in,
-	input setup,
-	input data_strobe,
-	input success);
+	input	clk48,
+	input	rst,
+	input	inc,
+	output	reg [7:0] q,
 
-reg	[7:0] buffer [0:
-reg 	[7:0] hello [0:7]; // = "Ready\n\000";
-reg	[2:0] helloptr = 0;
+	input	tx_en,
+	input	tx_j,
+	input	tx_se0,
+	input	usb_rst,
+	input	transaction_active,
+	input	[3:0] endpoint,
+	input	direction_in,
+	input	setup,
+	input	data_strobe,
+	input	success);
 
-module usb(
-    input rst_n,
-    input clk_48,
+// status
+reg	[9:0] ptr = 0;
+reg 	[7:0] status [0:1023]; // DP16KD
+reg	inhibit = 0;
 
-    input rx_j,
-    input rx_se0,
+always @(posedge clk48) begin
+	if (rst) begin
+		inhibit <= 0;
+		ptr <= 0;
+	end else begin
+		if (inhibit) begin
+			if (!inc) begin
+				inhibit <= 0;
+			end
+		end else if (inc) begin
+			inhibit <= 1'b1;
+			q <= status[ptr];
+			ptr <= ptr + 10'd1;
+			if (q == "\014") begin
+				ptr <= 10'd4; // do it again w/o the erase screen
+			end
+		end
+	end //reset
+end // always
 
-    output tx_en,
-    output tx_j,
-    output tx_se0,
-
-    input[6:0] usb_address,
-
-    output usb_rst,
-
-    output reg transaction_active,
-    output reg[3:0] endpoint,
-    output reg direction_in,
-    output reg setup,
-    input data_toggle,
-
-    input[1:0] handshake,
-    
-    output reg[7:0] data_out,
-    input[7:0] data_in,
-    input data_in_valid,
-    output reg data_strobe,
-    output reg success
-    );
+initial begin
+`include "status.v"
+end
+endmodule
