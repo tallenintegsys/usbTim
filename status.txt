@@ -1,0 +1,6 @@
+Ready
+\e[05mblink\e[00m
+\e[04munderline\e[00m
+\e[03mwhatever3does\e[00m
+\e[02mwhat2does\e[00m
+\e[01mandone?\e[00m
