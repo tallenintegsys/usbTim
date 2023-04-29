@@ -1,11 +1,10 @@
-`include "usb.v"
 `include "uart_tx.v"
 `timescale 1ns / 1ps
 
 module usb_top (
 	input		clk48,
 	input		usr_btn,	// SW0,
-	output 		rst_n,
+	output 		rst_n,		// "reboot"
 	output 		rgb_led0_r,	// [0:0]LED,
 	output 		rgb_led0_g,	// [0:0]LED,
 	output		rgb_led0_b,	// [0:0]LED,
@@ -20,11 +19,12 @@ reg	[3:0] step = 0;
 reg	[7:0] din;
 wire	[7:0] dout;
 reg	din_valid;
+wire	reset;
 
 // status
 reg	statusdone = 0;
 reg	[7:0] statusptr = 0;
-reg 	[7:0] status [0:104];
+reg 	[7:0] status [0:110];
 reg	[7:0] uart_d;
 reg	uart_dv = 0;
 wire	uart_sout;
@@ -39,6 +39,7 @@ assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 //assign rgb_led0_r = usb_tx_en;
 assign gpio_10 = uart_sout;
+assign reset = !usr_btn;
 
 /*
 usb usb0 (
@@ -75,28 +76,40 @@ uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 );
 
 always @(posedge clk48) begin
-	if (uart_dv) begin
-		uart_dv <= 1'b0;
-	end else if (!uart_busy) begin
-		if (!statusdone) begin
-			uart_d <= status[statusptr];
-			statusptr <= statusptr + 1;
-			uart_dv <= 1'b1;
-			if (uart_d == "\014") begin
-				statusdone <= 1'b1;
+	if (reset) begin
+		statusdone <= 1'b0;
+		statusptr <= 0;
+	end else begin
+		if (uart_dv) begin
+			uart_dv <= 1'b0;
+		end else if (!uart_busy) begin
+			if (!statusdone) begin
+				uart_d <= status[statusptr];
+				statusptr <= statusptr + 1;
+				uart_dv <= 1'b1;
+				if (uart_d == "\014") begin
+					statusdone <= 1'b1;
+				end
+			end else begin
+				uart_d <= dout;
+				uart_dv <= 1'b0; // stop sending
 			end
-		end else begin
-			uart_d <= dout;
-			uart_dv <= 1'b1;
 		end
-	end
+	end //reset
 end // always
 
 // Reset logic on button press.
 // this will enter the bootloader
 reg reset_sr = 1'b1;
+reg [23:0] rcount = 24'hffffffffffff;
 always @(posedge clk48) begin
-	reset_sr <= {usr_btn};
+	if (!usr_btn)
+		rcount <= rcount - 24'b1;
+	else
+		rcount <= 24'hffffffffffff;
+
+	if (rcount == 24'h000000000000)
+		reset_sr <= {usr_btn};
 end
 assign rst_n = reset_sr;
 

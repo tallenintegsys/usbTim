@@ -41,6 +41,7 @@ def main() -> int:
             continue
         if char == "\n":
             v.p("\\015")
+            v.p("\\012")
             continue
         if not char:
             break
