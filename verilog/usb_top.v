@@ -23,8 +23,8 @@ reg	din_valid;
 
 // status
 reg	statusdone = 0;
-reg	[7:0] statusptr = 22;
-reg 	[7:0] status [30:0];
+reg	[7:0] statusptr = 0;
+reg 	[7:0] status [0:104];
 reg	[7:0] uart_d;
 reg	uart_dv = 0;
 wire	uart_sout;
@@ -80,9 +80,9 @@ always @(posedge clk48) begin
 	end else if (!uart_busy) begin
 		if (!statusdone) begin
 			uart_d <= status[statusptr];
-			statusptr <= statusptr - 1;
+			statusptr <= statusptr + 1;
 			uart_dv <= 1'b1;
-			if (uart_d == "\777") begin
+			if (uart_d == "\014") begin
 				statusdone <= 1'b1;
 			end
 		end else begin

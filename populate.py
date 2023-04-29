@@ -29,20 +29,18 @@ def main() -> int:
         char = f.read(1)
         if esc:
             if char == "e":
-                v.p("\\")
-                v.p("0")
-                v.p("3")
-                v.p("3")
+                v.p("\\033") # esc
                 esc = False
                 continue
+            if char == "f":
+                v.p("\\014") # FF = EOF
+                esc = False
+                break
         if char == "\\":
             esc = True
             continue
         if char == "\n":
-            v.p("\\")
-            v.p("0")
-            v.p("1")
-            v.p("5")
+            v.p("\\015")
             continue
         if not char:
             break

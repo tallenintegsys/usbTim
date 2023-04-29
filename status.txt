@@ -4,3 +4,4 @@ Ready
 \e[03mwhatever3does\e[00m
 \e[02mwhat2does\e[00m
 \e[01mandone?\e[00m
+\f
