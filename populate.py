@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import sys
+import os
 
 # yosys only knows verilog, verilog is limited in how one may populate
 # a BRAM. This bit of Python nonsense converts a text file to a bunch
@@ -21,7 +22,7 @@ def main() -> int:
         print("the varilog statements are suitable to populate an array in an initial block.")
         print("usage: {} [array name]".format(sys.argv[0]))
         exit(1)
-    v.arrayName = sys.argv[1]
+    v.arrayName = os.path.splitext(sys.argv[1])[0]
     f = open("{}.txt".format(v.arrayName))
     esc = False
     while 1:
