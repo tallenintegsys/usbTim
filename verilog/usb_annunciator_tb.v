@@ -12,6 +12,7 @@ usb_annunciator uut (
 	rst,
 	inc,
 	q,
+	dv,
 
 	tx_en,
 	tx_j,

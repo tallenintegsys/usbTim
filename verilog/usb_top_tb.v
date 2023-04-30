@@ -31,6 +31,10 @@ initial begin
 	#0
 	usr_btn = 1'b1;
 	clk48 = 1'b0;
+	#5
+	usr_btn = 0;
+	#5
+	usr_btn = 1;
 	#1100000
 	$finish;
 end

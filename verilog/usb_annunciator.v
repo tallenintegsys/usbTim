@@ -3,6 +3,7 @@ module usb_annunciator (
 	input	rst,
 	input	inc,
 	output	reg [7:0] q,
+	output reg dv,
 
 	input	tx_en,
 	input	tx_j,
@@ -24,14 +25,17 @@ always @(posedge clk48) begin
 	if (rst) begin
 		inhibit <= 0;
 		ptr <= 0;
+		dv <= 1;
 	end else begin
 		if (inhibit) begin
 			if (!inc) begin
 				inhibit <= 0;
 			end
+			dv <= 0;
 		end else if (inc) begin
 			inhibit <= 1'b1;
 			q <= status[ptr];
+			dv <= 1'b1;
 			ptr <= ptr + 10'd1;
 			if (q == "\014") begin
 				ptr <= 10'd4; // do it again w/o the erase screen

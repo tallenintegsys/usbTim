@@ -1,4 +1,5 @@
 `include "uart_tx.v"
+`include "usb_annunciator.v"
 `timescale 1ns / 1ps
 
 module usb_top (
@@ -19,16 +20,17 @@ reg	[3:0] step = 0;
 reg	[7:0] din;
 wire	[7:0] dout;
 reg	din_valid;
-wire	reset;
+wire	rst;
 
 // status
 reg	[9:0] statusptr = 0;
 reg 	[7:0] status [0:1023]; // DP16KD
 reg	[7:0] uart_d;
-reg	uart_dv = 0;
+wire	uart_dv;
 wire	uart_sout;
 wire	uart_busy;
 wire	uart_done;
+reg	[3:0] endpoint;
 
 initial begin
 `include "status.v"
@@ -38,7 +40,7 @@ assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 //assign rgb_led0_r = usb_tx_en;
 assign gpio_10 = uart_sout;
-assign reset = !usr_btn;
+assign rst = !usr_btn;
 
 /*
 usb usb0 (
@@ -65,6 +67,24 @@ usb usb0 (
 );
 */
 
+usb_annunciator usb_annunciator0 (
+	.clk48(clk48),
+	.rst(rst),
+	.inc(uart_done),
+	.q(uart_d),
+	.dv(uart_dv),
+
+	.tx_en(tx_en),
+	.tx_j(tx_j),
+	.tx_se0(tx_se0),
+	.usb_rst(usb_rst),
+	.transaction_active(transaction_active),
+	.endpoint(endpoint),
+	.direction_in(direction_in),
+	.setup(setup),
+	.data_strobe(data_strobe),
+	.success(success));
+
 uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.i_Clock(clk48),
 	.i_TX_DV(uart_dv),
@@ -74,22 +94,6 @@ uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.o_TX_Done(uart_done)
 );
 
-always @(posedge clk48) begin
-	if (reset) begin
-		statusptr <= 0;
-	end else begin
-		if (uart_dv) begin
-			uart_dv <= 1'b0;
-		end else if (!uart_busy) begin
-			uart_d <= status[statusptr];
-			statusptr <= statusptr + 1;
-			uart_dv <= 1'b1;
-			if (uart_d == "\014") begin
-				statusptr <= 8'd4; // do it again w/o the erase screen
-			end
-		end
-	end //reset
-end // always
 
 // Reset logic on button press.
 // this will enter the bootloader
