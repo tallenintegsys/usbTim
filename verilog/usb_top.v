@@ -12,6 +12,14 @@ module usb_top (
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
 	output reg	usb_pullup,	// SITE "N2"
+	input		gpio_0,
+	input		gpio_1,
+	input		gpio_a0,
+	input		gpio_a1,
+	input		gpio_a2,
+	input		gpio_a3,
+	input		gpio_11,
+	input		gpio_12,
 	output 		gpio_10		// 0
 );
 
@@ -21,6 +29,7 @@ reg	[7:0] din;
 wire	[7:0] dout;
 reg	din_valid;
 wire	rst;
+reg	por_n = 0;
 
 // status
 reg	[9:0] statusptr = 0;
@@ -38,9 +47,17 @@ end
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
-//assign rgb_led0_r = usb_tx_en;
+assign tx_en = gpio_0;
+assign tx_j = gpio_a0;
+assign tx_se0 = gpio_a1;
+assign usb_rst = gpio_a2;
+assign transaction_active = gpio_a3;
+assign direction_in = gpio_11;
+assign setup = gpio_12;
+assign data_strobe = gpio_1;
+assign rgb_led0_r = ~tx_en;
 assign gpio_10 = uart_sout;
-assign rst = !usr_btn;
+assign rst = !usr_btn | !por_n;
 
 /*
 usb usb0 (
@@ -94,12 +111,17 @@ uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.o_TX_Done(uart_done)
 );
 
-
 // Reset logic on button press.
 // this will enter the bootloader
+reg [15:0] count = 16'hffff;
 reg reset_sr = 1'b1;
 reg [23:0] rcount = 24'hffffff;
 always @(posedge clk48) begin
+	if (count)
+		count <= count - 16'd1;
+	else
+		por_n <= 1;
+
 	if (!usr_btn)
 		rcount <= rcount - 24'b1;
 	else

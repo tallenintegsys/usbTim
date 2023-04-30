@@ -1,8 +1,13 @@
 \e[2J\e[1;1H
 Ready
-\e[05mblink\e[00m
-\e[04munderline\e[00m
-\e[03mwhatever3does\e[00m
-\e[02mwhat2does\e[00m
-\e[01mandone?\e[00m
+\e[02m      tx_en         \e[00m
+\e[02m       tx_j         \e[00m
+\e[02m      tx_se0        \e[00m
+\e[02m      usb_rst       \e[00m
+\e[02m transaction_active \e[00m
+\e[00m     endpoint: 0    \e[00m
+\e[02m    direction_in    \e[00m
+\e[02m       setup        \e[00m
+\e[02m    data_strobe     \e[00m
+\e[02m      success       \e[00m
 \f
