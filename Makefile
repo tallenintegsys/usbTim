@@ -6,8 +6,8 @@ all: ${PROJ}.json
 dfu: ${PROJ}.dfu
 	dfu-util -a0 -D $<
 
-%.json: verilog/%_top.v
-	yosys -p "read_verilog $<; synth_ecp5 -json $@"
+%.json: verilog/*.v
+	yosys -p "read_verilog verilog/usb_top.v; synth_ecp5 -json $@"
 
 %_out.config: %.json
 	nextpnr-ecp5 --json $< --textcfg $@ --85k --package CSFBGA285 --lpf orangecrab_r0.2.pcf
@@ -22,10 +22,10 @@ dfu: ${PROJ}.dfu
 .PHONY:  clean sim
 
 sim:
-#	iverilog -g2012 -I verilog verilog/usb_annunciator_tb.v
-#	vvp a.out
-	iverilog -g2012 -I verilog verilog/usb_top_tb.v
+	iverilog -g2012 -I verilog verilog/usb_annunciator_tb.v
 	vvp a.out
+#	iverilog -g2012 -I verilog verilog/usb_top_tb.v
+#	vvp a.out
 #	iverilog -I verilog verilog/uart_tx_tb.v -o uart_tx_tb
 #	vvp uart_tx_tb
 
