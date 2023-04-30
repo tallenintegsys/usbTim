@@ -1,5 +1,6 @@
 `include "uart_tx.v"
 `include "usb_annunciator.v"
+`include "usb.v"
 `timescale 1ns / 1ps
 
 module usb_top (
@@ -12,18 +13,11 @@ module usb_top (
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
 	output reg	usb_pullup,	// SITE "N2"
-	input		gpio_0,
-	input		gpio_1,
-	input		gpio_a0,
-	input		gpio_a1,
-	input		gpio_a2,
-	input		gpio_a3,
-	input		gpio_11,
-	input		gpio_12,
-	output 		gpio_10		// 0
+	output 		gpio_10		// serial out
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
+wire 	rx_j, usb_rst, tx_se0, transaction_active, direction_in, setup, data_strobe, success;
 reg	[3:0] step = 0;
 reg	[7:0] din;
 wire	[7:0] dout;
@@ -47,42 +41,31 @@ end
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
-assign tx_en = gpio_0;
-assign tx_j = gpio_a0;
-assign tx_se0 = gpio_a1;
-assign usb_rst = gpio_a2;
-assign transaction_active = gpio_a3;
-assign direction_in = gpio_11;
-assign setup = gpio_12;
-assign data_strobe = gpio_1;
-assign rgb_led0_r = ~tx_en;
 assign gpio_10 = uart_sout;
 assign rst = !usr_btn | !por_n;
 
-/*
 usb usb0 (
 	.rst_n(1'b1),
 	.clk_48(clk48),
-	.rx_j(usb_d_p),
-	.rx_se0(!usb_d_p && !usb_d_n),
+	.rx_j(rx_j),
+	.rx_se0(!gpio_5 && !gpio_6),
 	.tx_j(usb_tx_j),
 	.tx_en(usb_tx_en),
 	.tx_se0(usb_tx_se0),
 	.usb_address(7'h00),
-	//output usb_rst,
-	//output reg transaction_active,
-	//output reg[3:0] endpoint,
-	//output reg direction_in,
-	.setup(rgb_led0_b),
+	.usb_rst(usb_rst),
+	.transaction_active(transaction_active),
+	.endpoint(endpoint),
+	.direction_in(direction_in),
+	.setup(setup),
 	//input data_toggle,
 	//input[1:0] handshake,
 	.data_out(dout),
 	.data_in(din),
 	.data_in_valid(din_valid),
-	//output reg data_strobe,
-	.success(rgb_led0_g)
+	.data_strobe(data_strobe),
+	.success(success)
 );
-*/
 
 usb_annunciator usb_annunciator0 (
 	.clk48(clk48),
@@ -91,8 +74,8 @@ usb_annunciator usb_annunciator0 (
 	.q(uart_d),
 	.dv(uart_dv),
 
-	.tx_en(tx_en),
-	.tx_j(tx_j),
+	.tx_en(usb_tx_en),
+	.tx_j(usb_tx_j),
 	.tx_se0(tx_se0),
 	.usb_rst(usb_rst),
 	.transaction_active(transaction_active),
