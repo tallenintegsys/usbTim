@@ -57,8 +57,9 @@ always @(posedge clk48) begin
 				q <= "1";
 			else if (success && ptr == 10'd310)
 				q <= "1";
+			else
+				q <= status[ptr];
 
-			q <= status[ptr];
 			if (q == "\014") begin
 				ptr <= 10'd4; // do it again w/o the erase screen
 			end else begin
