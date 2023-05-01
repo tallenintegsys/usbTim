@@ -19,7 +19,7 @@ module usb_annunciator (
 	input	data_strobe,
 	input	success,
 
-	input	din,
+	input	[7:0] din,
 	input	din_v);
 
 // status
@@ -75,17 +75,17 @@ always @(posedge clk48) begin
 				dout_v <= 1'b1;
 				inhibit <= 1'b1;
 			end
-		end
-
+		end // inhibit
 
 		if (din_v) begin
-			if (inptr > 10'd500)
+			if (inptr > 10'd400) begin
 				inptr <= 10'd348;
-		end else begin
-			inptr <= inptr + 10'd1;
+			end else begin
+				inptr <= inptr + 10'd1;
+			end
 			status[inptr] <= din;
-		end
-	end //reset
+		end // din_v
+	end // rst
 end // always
 
 initial begin
