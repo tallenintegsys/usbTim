@@ -33,7 +33,6 @@ always @(posedge clk48) begin
 			end
 			dv <= 0;
 		end else if (inc) begin
-			inhibit <= 1'b1;
 			if (tx_en && ptr == 10'd22)
 				q <= "1";
 			else if (tx_j && ptr == 10'd54)
@@ -44,11 +43,12 @@ always @(posedge clk48) begin
 				q <= "1";
 			else if (transaction_active && ptr == 10'd150)
 				q <= "1";
-			else if (ptr == 10'd199)
+			else if (ptr == 10'd199) begin
 				if (endpoint < 4'ha)
 					q <= endpoint + "0";
 				else
 					q <= endpoint + "(";
+			end
 			else if (direction_in && ptr == 10'd214)
 				q <= "1";
 			else if (setup && ptr == 10'd246)
@@ -57,12 +57,14 @@ always @(posedge clk48) begin
 				q <= "1";
 			else if (success && ptr == 10'd310)
 				q <= "1";
-			else
-				q <= status[ptr];
-			dv <= 1'b1;
-			ptr <= ptr + 10'd1;
+
+			q <= status[ptr];
 			if (q == "\014") begin
 				ptr <= 10'd4; // do it again w/o the erase screen
+			end else begin
+				ptr <= ptr + 10'd1;
+				dv <= 1'b1;
+				inhibit <= 1'b1;
 			end
 		end
 	end //reset
