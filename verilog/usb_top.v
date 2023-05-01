@@ -17,11 +17,11 @@ module usb_top (
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
-wire 	rx_j, usb_rst, tx_se0, transaction_active, direction_in, setup, data_strobe, success;
+wire 	rx_j, usb_rst, tx_se0, transaction_active, direction_in, setup, success;
 reg	[3:0] step = 0;
 reg	[7:0] din;
 wire	[7:0] dout;
-reg	din_valid;
+reg	usb_din_v;
 wire	rst;
 reg	por_n = 0;
 
@@ -60,10 +60,10 @@ usb usb0 (
 	.setup(setup),
 	//input data_toggle,
 	//input[1:0] handshake,
-	.data_out(dout),
-	.data_in(din),
-	.data_in_valid(din_valid),
-	.data_strobe(data_strobe),
+	.data_out(usb_dout),
+	.data_in(usb_din),
+	.data_in_valid(usb_din_v),
+	.data_strobe(usb_dout_v),
 	.success(success)
 );
 
@@ -71,8 +71,8 @@ usb_annunciator usb_annunciator0 (
 	.clk48(clk48),
 	.rst(rst),
 	.inc(uart_done),
-	.q(uart_d),
-	.dv(uart_dv),
+	.dout(uart_d),
+	.dout_v(uart_dv),
 
 	.tx_en(usb_tx_en),
 	.tx_j(usb_tx_j),
@@ -82,8 +82,11 @@ usb_annunciator usb_annunciator0 (
 	.endpoint(endpoint),
 	.direction_in(direction_in),
 	.setup(setup),
-	.data_strobe(data_strobe),
-	.success(success));
+	.data_strobe(usb_dout_v),
+	.success(success),
+
+	.din(usb_dout),
+	.din_v(usb_dout_v));
 
 uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.i_Clock(clk48),

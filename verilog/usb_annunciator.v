@@ -1,10 +1,13 @@
 module usb_annunciator (
 	input	clk48,
 	input	rst,
-	input	inc,
-	output	reg [7:0] q,
-	output reg dv,
 
+	// serial out
+	input	inc,
+	output	reg [7:0] dout,
+	output  reg dout_v,
+
+	// idiot lights
 	input	tx_en,
 	input	tx_j,
 	input	tx_se0,
@@ -14,7 +17,10 @@ module usb_annunciator (
 	input	direction_in,
 	input	setup,
 	input	data_strobe,
-	input	success);
+	input	success,
+
+	input	din,
+	input	din_v);
 
 // status
 reg	[9:0] ptr = 0;
@@ -25,46 +31,46 @@ always @(posedge clk48) begin
 	if (rst) begin
 		inhibit <= 0;
 		ptr <= 0;
-		dv <= 1;
+		dout_v <= 1;
 	end else begin
 		if (inhibit) begin
 			if (!inc) begin
 				inhibit <= 0;
 			end
-			dv <= 0;
+			dout_v <= 0;
 		end else if (inc) begin
 			if (tx_en && ptr == 10'd22)
-				q <= "1";
+				dout <= "1";
 			else if (tx_j && ptr == 10'd54)
-				q <= "1";
+				dout <= "1";
 			else if (tx_se0 && ptr == 10'd86)
-				q <= "1";
+				dout <= "1";
 			else if (usb_rst && ptr == 10'd118)
-				q <= "1";
+				dout <= "1";
 			else if (transaction_active && ptr == 10'd150)
-				q <= "1";
+				dout <= "1";
 			else if (ptr == 10'd199) begin
 				if (endpoint < 4'ha)
-					q <= endpoint + "0";
+					dout <= endpoint + "0";
 				else
-					q <= endpoint + "(";
+					dout <= endpoint + "(";
 			end
 			else if (direction_in && ptr == 10'd214)
-				q <= "1";
+				dout <= "1";
 			else if (setup && ptr == 10'd246)
-				q <= "1";
+				dout <= "1";
 			else if (data_strobe && ptr == 10'd278)
-				q <= "1";
+				dout <= "1";
 			else if (success && ptr == 10'd310)
-				q <= "1";
+				dout <= "1";
 			else
-				q <= status[ptr];
+				dout <= status[ptr];
 
-			if (q == "\014") begin
+			if (dout == "\014") begin
 				ptr <= 10'd4; // do it again w/o the erase screen
 			end else begin
 				ptr <= ptr + 10'd1;
-				dv <= 1'b1;
+				dout_v <= 1'b1;
 				inhibit <= 1'b1;
 			end
 		end

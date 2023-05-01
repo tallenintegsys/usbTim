@@ -4,15 +4,15 @@ module usb_annunciator_tb ();
 reg	clk48;
 reg	rst;
 reg	inc;
-wire	[7:0] q;
+wire	[7:0] dout;
 reg	[3:0] endpoint;
 
 usb_annunciator uut (
 	clk48,
 	rst,
 	inc,
-	q,
-	dv,
+	dout,
+	dout_v,
 
 	tx_en,
 	tx_j,
@@ -23,7 +23,10 @@ usb_annunciator uut (
 	direction_in,
 	setup,
 	data_strobe,
-	success);
+	success,
+
+	din,
+	din_v);
 
 initial begin
 	$dumpfile("usb_annunciator_tb.vcd");
