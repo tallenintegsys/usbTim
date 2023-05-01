@@ -10,4 +10,5 @@ Ready
 \e[02m       setup        \e[00m
 \e[02m    data_strobe     \e[00m
 \e[02m      success       \e[00m
-\f
+
+data:
