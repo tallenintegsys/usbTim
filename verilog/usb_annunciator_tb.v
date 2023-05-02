@@ -6,6 +6,7 @@ reg	rst;
 reg	inc;
 wire	[7:0] dout;
 reg	[3:0] endpoint;
+reg	[7:0] din;
 
 usb_annunciator uut (
 	clk48,

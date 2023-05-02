@@ -27,6 +27,9 @@ reg 	[7:0] status [0:1023];	// DP16KD
 reg	dout_i = 0; 		// inhibit dout
 reg	[9:0] outptr = 0;
 reg	[9:0] inptr = 10'd348;
+reg	hilo = 0;
+reg	[3:0] nibble = 4'h0;
+reg	din_i = 0;
 
 always @(posedge clk48) begin
 	if (rst) begin
@@ -81,9 +84,24 @@ always @(posedge clk48) begin
 			if (inptr > 10'd400) begin
 				inptr <= 10'd348;
 			end else begin
-				inptr <= inptr + 10'd1;
+				if (hilo) begin
+					hilo <= 1'b0;
+					nibble <= din[3:0];
+					din_i <= 1'd1;		// done with this byte, wait for next
+				end else begin
+					hilo <= 1'b1;
+					nibble <= din[7:4];
+				end
 			end
-			status[inptr] <= din;
+			inptr <= inptr + 10'd1;
+			if (nibble < 4'ha) begin
+				status[inptr] <= nibble + "0";
+			end else begin
+				status[inptr] <= nibble + "(";
+			end
+
+		end else begin
+			din_i <= 0;				// din valid went low, release the inhibit and wait for next
 		end // din_v
 	end // rst
 end // always
