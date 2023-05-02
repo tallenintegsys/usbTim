@@ -23,21 +23,21 @@ module usb_annunciator (
 	input	din_v);
 
 // status
+reg 	[7:0] status [0:1023];	// DP16KD
+reg	dout_i = 0; 		// inhibit dout
 reg	[9:0] outptr = 0;
-reg 	[7:0] status [0:1023]; // DP16KD
-reg	inhibit = 0;
 reg	[9:0] inptr = 10'd348;
 
 always @(posedge clk48) begin
 	if (rst) begin
-		inhibit <= 0;
+		dout_i <= 0;
 		outptr <= 0;
 		dout_v <= 1'd1;
 		inptr <= 10'd348;
 	end else begin
-		if (inhibit) begin
+		if (dout_i) begin
 			if (!inc) begin
-				inhibit <= 0;
+				dout_i <= 0;
 			end
 			dout_v <= 0;
 		end else if (inc) begin
@@ -69,13 +69,13 @@ always @(posedge clk48) begin
 				dout <= status[outptr];
 
 			if (outptr == 10'd400) begin
-				outptr <= 10'd4; // do it again w/o the erase screen
+				outptr <= 10'd4; // back to the top w/o the erase screen
 			end else begin
 				outptr <= outptr + 10'd1;
 				dout_v <= 1'b1;
-				inhibit <= 1'b1;
+				dout_i <= 1'b1;
 			end
-		end // inhibit
+		end // dout_i
 
 		if (din_v) begin
 			if (inptr > 10'd400) begin
