@@ -44,7 +44,7 @@ always @(posedge clk48) begin
 	if (rst) begin
 		dout_state <= DOUT_IDLE;
 		din_state <= DIN_IDLE;
-		outptr <= 10'd347;
+		outptr <= 10'd348;
 		dout_v <= 1'd1;
 		inptr <= 10'd348;
 		rst_state <= 1'd1;
@@ -52,7 +52,7 @@ always @(posedge clk48) begin
 		if (rst_state) begin
 			outptr <= outptr + 10'd1;
 			status[outptr] <= " ";
-			if (outptr == 10'hffff)
+			if (outptr == 10'h3ff)
 				rst_state <= 1'b0;
 		end // if (rst_state)
 
@@ -89,14 +89,15 @@ always @(posedge clk48) begin
 				else
 					dout <= status[outptr];
 
-				if (outptr == 10'd400) begin // we're at the bottom of the screen
+				if (outptr == 10'd500) begin // we're at the bottom of the screen
 					outptr <= 10'd4; // back to the top w/o the erase screen
+				end else begin
+					outptr <= outptr + 10'd1;
 				end
-				outptr <= outptr + 10'd1;
-				dout_v <= 1'b1;
 				dout_state <= DOUT_DONE;
 			end // DOUT_BSY
 			DOUT_DONE: begin
+				dout_v <= 1'b1;
 				if (!inc)
 					dout_state <= DOUT_IDLE;
 			end // DOUT_DONE
@@ -117,6 +118,7 @@ always @(posedge clk48) begin
 					status[inptr] <= {4'd0, nibble} + "(";
 				end
 				din_state <= DIN_LNIBBLE;
+				inptr <= inptr + 10'd1;
 			end
 			DIN_LNIBBLE: begin
 				nibble <= din[3:0];
@@ -126,8 +128,11 @@ always @(posedge clk48) begin
 					status[inptr] <= {4'd0, nibble} + "(";
 				end
 				din_state <= DIN_DONE;
+				inptr <= inptr + 10'd1;
 			end
 			DIN_DONE: begin
+				if (inptr == 10'd500)
+					inptr <= 10'd348;
 				if (!din_v)
 					din_state <= DIN_IDLE;
 			end
