@@ -19,7 +19,7 @@ dfu: ${PROJ}.dfu
 	cp $< $@
 	dfu-suffix -v 1209 -p 5af0 -a $@
 
-.PHONY:  clean sim
+.PHONY:  clean sim verilator
 
 sim:
 	iverilog -g2012 -I verilog verilog/usb_annunciator_tb.v
@@ -28,6 +28,9 @@ sim:
 #	vvp a.out
 #	iverilog -I verilog verilog/uart_tx_tb.v -o uart_tx_tb
 #	vvp uart_tx_tb
+
+verilator:
+	verilator --lint-only -Iverilog verilog/usb_annunciator.v
 
 clean:
 	rm -rf *.vcd a.out *.svf *.bit *.config *.json *.dfu 
