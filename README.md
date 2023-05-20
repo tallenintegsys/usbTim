@@ -3,6 +3,6 @@ This is just a base implementation for a USB peripheral. I am increasingly needi
 
 I am also doing a silly experiment. Since the open source tools are so fast, I am experimenting with skipping simulation (gasp!!!) and doing my "simulation" in HW with a logic analyzer.
 <br><p>
-# Terminal output from FPGA 
-  Bright text means a wire is active, dim means inactive, there is also some hex data too.  
+# Terminal output from FPGA
+  This is an annunciator for various ports on the USB module. Bright text means a wire is active, dim means inactive, there is also some hex data too.  
 ![Terminal output from FPGA](doc/uartAnnunciator.jpg)
