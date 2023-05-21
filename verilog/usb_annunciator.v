@@ -3,7 +3,7 @@ module usb_annunciator (
 	input	rst,
 
 	// serial out
-	input	inc,
+	input	      inc,
 	output	reg [7:0] dout,
 	output  reg dout_v,
 
@@ -32,7 +32,7 @@ localparam DIN_LNIBBLE 	=	2'd2;
 localparam DIN_DONE  	=	2'd3;
 
 // status
-reg 	[7:0] status [0:1023];	// DP16KD
+reg [7:0] status [0:1023];	// DP16KD
 reg	[1:0] dout_state = 	DOUT_IDLE; 	// inhibit dout
 reg	[9:0] outptr     = 	10'd0;
 reg	[9:0] inptr      =	10'd348;
@@ -74,9 +74,9 @@ always @(posedge clk48) begin
 					dout <= "1";
 				else if (outptr == 10'd199) begin
 					if (endpoint < 4'ha)
-						dout <= {4'd0, endpoint} + "0";
+						dout <= {endpoint, 4'd0} + "0";
 					else
-						dout <= {4'd0, endpoint} + "(";
+						dout <= {endpoint, 4'd0} + "(";
 				end
 				else if (direction_in && outptr == 10'd214)
 					dout <= "1";
