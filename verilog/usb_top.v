@@ -6,30 +6,30 @@
 module usb_top (
 	input		clk48,
 	input		usr_btn,	// SW0,
-	output 		rst_n,		// "reboot"
-	output 		rgb_led0_r,	// [0:0]LED,
-	output 		rgb_led0_g,	// [0:0]LED,
+	output		rst_n,		// "reboot"
+	output		rgb_led0_r,	// [0:0]LED,
+	output		rgb_led0_g,	// [0:0]LED,
 	output		rgb_led0_b,	// [0:0]LED,
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
-	output 		gpio_10		// serial out
+	output		gpio_10		// serial out
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
-wire 	rx_j, usb_rst, transaction_active, direction_in, setup, success, usb_dout_v;
+wire	rx_j, usb_rst, transaction_active, direction_in, setup, success, usb_dout_v;
 wire	[7:0] usb_dout;
-reg	[3:0] step = 0;
-reg	[7:0] usb_din = 8'h00;
-reg	usb_din_v = 0;
+reg		[3:0] step = 0;
+reg		[7:0] usb_din = 8'h00;
+reg		usb_din_v = 0;
 wire	[7:0] uart_d;
 wire	uart_d_v;
 wire	rst;
-reg	por_n = 0;
+reg		por_n = 0;
 
 // status
-reg	[9:0] statusptr = 0;
-reg 	[7:0] status [0:1023]; // DP16KD
-reg	[7:0] uart_d;
+reg		[9:0] statusptr = 0;
+reg		[7:0] status [0:1023]; // DP16KD
+reg		[7:0] uart_d;
 wire	uart_dv;
 wire	uart_sout;
 wire	uart_busy;
@@ -86,7 +86,7 @@ usb_annunciator usb_annunciator0 (
 	.data_strobe(usb_dout_v),
 	.success(success),
 	.din(usb_dout),
-        .din_v(usb_dout_v));
+	.din_v(usb_dout_v));
 
 uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.i_Clock(clk48),
