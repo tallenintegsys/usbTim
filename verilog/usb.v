@@ -167,31 +167,32 @@ always @(posedge clk_48 or negedge rst_n) begin
         tx_transmit <= 1'b0;
         case (state)
             st_idle: begin
-                if (!token_active)
+                if (!token_active)  // have we timed out?
                     transaction_active <= 1'b0;
 
-                if (recv_packet) begin
-                    if (recv_pid[1:0] == pt_token) begin
+                if (recv_packet) begin  // did we get a packet?
+                   if (recv_pid[1:0] == pt_token) begin    // token?
                         state <= st_data;
-                    end else begin
+                   end else begin // is it a data pkt and not DATA2 and we aren't timed out
                         if (recv_pid[1:0] == pt_data && !recv_pid[2] && token_active) begin
-                            handshake_latch <= handshake;
-                            state <= recv_pid[3] == data_toggle? st_data: st_send_ack;
+                            handshake_latch <= handshake; // send our response
+                            state <= recv_pid[3] == data_toggle ? st_data : st_send_ack; // more data or ack?
                         end else begin
                             state <= st_err;
                         end
                     end
                 end
             end
-            st_data: begin
-                if (!recv_packet) begin
+            st_data: begin // RX a pkt
+                if (!recv_packet) begin // pkt RX'd
                     state <= st_idle;
                     case (recv_pid[1:0])
-                        pt_token: begin
+                        pt_token: begin // pkt is a token
+                            // it's valid & addressed to our EP & not a SOF token
                             if (recv_queue_1_valid && recv_crc5_ok && recv_queue_1[6:0] == usb_address && recv_pid[3:2] != tok_sof) begin
-                                token_timeout <= 7'h7f;
+                                token_timeout <= 7'h7f; // start the timeout timer
                                 transaction_active <= 1'b1;
-                                endpoint <= { recv_queue_0[2:0], recv_queue_1[7] };
+                                endpoint <= { recv_queue_0[2:0], recv_queue_1[7] }; // what EP are they talking to
                                 case (recv_pid[3:2])
                                     tok_in: begin
                                         direction_in <= 1'b1;
@@ -214,7 +215,7 @@ always @(posedge clk_48 or negedge rst_n) begin
                                 setup <= 1'bx;
                             end
                         end
-                        pt_data: begin
+                        pt_data: begin // pkt is data
                             if (recv_queue_1_valid && recv_crc16_ok) begin
                                 if (handshake_latch == hs_ack || handshake_latch == hs_none)
                                     success <= 1'b1;
@@ -227,7 +228,7 @@ always @(posedge clk_48 or negedge rst_n) begin
                             setup <= 1'bx;
                         end
                     endcase
-                end else if (recv_datastrobe) begin
+                end else if (recv_datastrobe) begin // pkt RXing
                     case (recv_pid[1:0])
                         pt_token: begin
                             if (recv_queue_1_valid)
@@ -250,7 +251,7 @@ always @(posedge clk_48 or negedge rst_n) begin
                     if (handshake != hs_ack && handshake != hs_none) begin
                         handshake_latch <= handshake;
                         state <= st_send_handshake;
-                    end else begin
+                    end else begin // start the TX
                         tx_data <= { !data_toggle, 3'b100, data_toggle, 3'b011 };
                         tx_transmit <= 1'b1;
                     end
