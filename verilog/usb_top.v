@@ -37,7 +37,7 @@ wire	uart_done;
 wire	[3:0] endpoint;
 
 initial begin
-`include "status.v"
+	`include "status.v"
 end
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
