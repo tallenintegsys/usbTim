@@ -1,5 +1,4 @@
-
 *.swp
 *.dfu
 *.log
-
+*.json
