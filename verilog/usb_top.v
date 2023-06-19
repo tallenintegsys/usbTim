@@ -9,26 +9,22 @@ module usb_top (
 	output		rgb_led0_b,	// [0:0]LED,
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
-	output		gpio_10,	// serial out
-	output		gpio_a0,
-	output		gpio_a1,
-	output		gpio_a2,
-	output		gpio_a3
+	output		gpio_10		// serial out
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
 wire	rx_j, usb_rst, transaction_active, direction_in, setup, success, data_strobe;
 wire	[7:0] usb_dout;
-reg		[3:0] step = 0;
-reg		[7:0] usb_din = 8'h00;
-reg		usb_din_v = 0;
+reg	[3:0] step = 0;
+reg	[7:0] usb_din = 8'h00;
+reg	usb_din_v = 0;
 wire	[7:0] uart_d;
 wire	uart_d_v;
 wire	rst;
-reg		por_n = 0;
+reg	por_n = 0;
 
 // status
-reg		[7:0] uart_d;
+reg	[7:0] uart_d;
 wire	uart_dv;
 wire	uart_sout;
 wire	uart_busy;
@@ -39,10 +35,6 @@ assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_10 = uart_sout;
 assign rst = !usr_btn | !por_n;
-assign gpio_a0 = transaction_active;
-assign gpio_a1 = direction_in;
-assign gpio_a2 = data_strobe;
-assign gpio_a3 = usb_dout[0] | usb_dout[1] | usb_dout[2] | usb_dout[3] | usb_dout[4] | usb_dout[5] | usb_dout[6] | usb_dout[7];
 
 usb usb0 (
 	.rst_n(!rst),
