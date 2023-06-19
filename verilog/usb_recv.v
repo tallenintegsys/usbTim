@@ -1,5 +1,3 @@
-`include "utils.v"
-
 module usb_recv_sm(
     input rst_n,
     input clk,

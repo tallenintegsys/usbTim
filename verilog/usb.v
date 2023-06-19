@@ -1,6 +1,3 @@
-`include "usb_tx.v"
-`include "usb_recv.v"
-
 module usb(
     input rst_n,
     input clk_48,

@@ -1,5 +1,7 @@
 PROJ=usb
 VFLAGS= -Wall -g2005
+PCF = orangecrab_r0.2.pcf
+DEVICE = 85k
 
 all: ${PROJ}.json
 
@@ -7,10 +9,10 @@ dfu: ${PROJ}.dfu
 	dfu-util -a0 -D $<
 
 %.json: verilog/*.v
-	yosys -p "read_verilog verilog/usb_top.v; synth_ecp5 -json $@"
+	yosys -p "read_verilog -sv -Iverilog $^; synth_ecp5 -flatten -json $@"
 
 %_out.config: %.json
-	nextpnr-ecp5 --json $< --textcfg $@ --85k --package CSFBGA285 --lpf orangecrab_r0.2.pcf
+	nextpnr-ecp5 --json $< --textcfg $@ --$(DEVICE) --package CSFBGA285 --lpf $(PCF)
 
 %.bit: %_out.config
 	ecppack --compress --freq 38.8 --input $< --bit $@

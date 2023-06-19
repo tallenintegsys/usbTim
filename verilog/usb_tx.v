@@ -1,5 +1,3 @@
-`include "usb_utils.v"
-
 module usb_tx(
     input rst_n,
     input clk_48,
