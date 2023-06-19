@@ -24,8 +24,10 @@ dfu: ${PROJ}.dfu
 .PHONY:  clean sim verilator
 
 sim:
-	iverilog -g2012 -I verilog verilog/usb_annunciator_tb.v
+	iverilog -I verilog test/usb_top_tb.sv verilog/*.v
 	vvp a.out
+#	iverilog -g2012 -I verilog verilog/usb_annunciator_tb.v
+#	vvp a.out
 #	iverilog -g2012 -I verilog verilog/usb_top_tb.v
 #	vvp a.out
 #	iverilog -I verilog verilog/uart_tx_tb.v -o uart_tx_tb

@@ -10,7 +10,7 @@ module usb_top (
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
 	output		gpio_10,	// serial out
-	output		gpio_a0,
+	output		gpio_a0
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
@@ -25,7 +25,6 @@ wire	rst;
 reg	por_n = 0;
 
 // status
-reg	[7:0] uart_d;
 wire	uart_dv;
 wire	uart_sout;
 wire	uart_busy;
@@ -112,7 +111,7 @@ always @(posedge clk48) begin
 			state <= 0;
 		end
 	endcase
-	if (ep_data[0] == 16*8'h8006000100004000) a0 <= 1;
+	if (ep_data[0] == 64'h8006000100004000) a0 <= 1'd1;
 	else a0 <= 0;
 end //always
 
