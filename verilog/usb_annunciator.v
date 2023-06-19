@@ -109,9 +109,10 @@ always @(posedge clk48) begin
 			DIN_IDLE: begin
 				if (din_v)
 					din_state <= DIN_HNIBBLE;
+				nibble <= din[7:4]; // hnibble
 			end
 			DIN_HNIBBLE: begin
-				nibble <= din[7:4];
+				nibble <= din[3:0]; // lnibble
 				if (nibble < 4'ha) begin
 					status[inptr] <= {4'd0, nibble} + "0";
 				end else begin
@@ -121,7 +122,6 @@ always @(posedge clk48) begin
 				inptr <= inptr + 10'd1;
 			end
 			DIN_LNIBBLE: begin
-				nibble <= din[3:0];
 				if (nibble < 4'ha) begin
 					status[inptr] <= {4'd0, nibble} + "0";
 				end else begin
@@ -141,6 +141,6 @@ always @(posedge clk48) begin
 end // always
 
 initial begin
-`include "status.v"
+`include "status.vh"
 end
 endmodule
