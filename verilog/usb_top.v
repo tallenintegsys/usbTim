@@ -9,7 +9,8 @@ module usb_top (
 	output		rgb_led0_b,	// [0:0]LED,
 	inout		gpio_5,		// usb_d_p
 	inout		gpio_6,		// usb_d_n
-	output		gpio_10		// serial out
+	output		gpio_10,	// serial out
+	output		gpio_a0,
 );
 
 wire	usb_tx_se0, usb_tx_j, usb_tx_en;
@@ -30,11 +31,13 @@ wire	uart_sout;
 wire	uart_busy;
 wire	uart_done;
 wire	[3:0] endpoint;
+reg	a0;
 
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_10 = uart_sout;
 assign rst = !usr_btn | !por_n;
+assign gpio_a0 = a0;
 
 usb usb0 (
 	.rst_n(!rst),
@@ -87,6 +90,32 @@ uart_tx #(.CLKS_PER_BIT(48000000/115200)) uart_tx0 (
 	.o_TX_Serial(uart_sout),
 	.o_TX_Done(uart_done));
 
+logic	[8*8-1:0] ep_data [15:0];
+reg	[6:0] ep_ptrs [15:0];
+reg	[6:0] ep_ptr = 0;
+reg	[3:0] ep = 0;
+reg	[2:0] state = 0;
+always @(posedge clk48) begin
+	case (state)
+		0: begin
+			if (data_strobe) begin
+				ep <= endpoint;
+				state <= 1;
+			end
+		end
+		1: begin
+			ep_ptr <= ep_ptrs[ep];
+			state <= 2;
+		end
+		2: begin
+			ep_data[ep] <= {ep_data[ep][7*8-1:0], usb_dout};
+			state <= 0;
+		end
+	endcase
+	if (ep_data[0] == 16*8'h8006000100004000) a0 <= 1;
+	else a0 <= 0;
+end //always
+
 // Reset logic on button press.
 // this will enter the bootloader
 reg [15:0] count = 16'hffff;
@@ -105,7 +134,7 @@ always @(posedge clk48) begin
 
 	if (rcount == 24'h000000)
 		reset_sr <= {usr_btn};
-end
+end //always
 assign rst_n = reset_sr;
 
 endmodule
