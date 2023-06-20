@@ -35,7 +35,7 @@ reg	a0;
 assign gpio_5 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_6 = usb_tx_en ? (usb_tx_se0 ? 1'b0 : !usb_tx_j) : 1'bz;	// go hi-z if we're not tx'ing
 assign gpio_10 = uart_sout;
-assign rst = !usr_btn | !por_n;
+assign rst = !usr_btn;// | !por_n;
 assign gpio_a0 = a0;
 
 usb usb0 (

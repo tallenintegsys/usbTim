@@ -35,23 +35,19 @@ assign gpio_6 = r16[9];
 initial begin
 	$dumpfile("usb_top_tb.vcd");
 	$dumpvars(0, uut);
-	file = $fopen("test/raw", "rb");
+	file = $fopen("test/rawSmall", "rb");
 	if (file == `NULL) begin
 		$display("data_file handle was NULL");
 		$finish;
 	end
 	#0
-	usr_btn = 1'b1;
+	usr_btn = 1'b0;
 	clk48 = 1'b0;
 	#5
-	usr_btn = 0;
+	usr_btn = 1'd1;
 	while (!$feof(file)) begin
 		#5
 		status = $fread(r16, file);
-	//	$display("%x\n", r16);
-	//	if (r16[9]) $finish;
-//		gpio_5 = r16[8];
-//		gpio_6 = r16[9];
 	end
 	#5
 	usr_btn = 1;

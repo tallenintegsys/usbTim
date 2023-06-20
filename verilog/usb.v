@@ -21,7 +21,7 @@ module usb(
 
     input[1:0] handshake,
     
-    output reg[7:0] data_out,
+    output [7:0] data_out,
     input[7:0] data_in,
     input data_in_valid,
     output reg data_strobe,
@@ -34,6 +34,7 @@ localparam
     hs_nak = 2'b10,
     hs_stall = 2'b11;
 
+reg [7:0] data_out = 0;
 wire[3:0] recv_pid;
 wire[7:0] recv_data;
 wire recv_packet;
