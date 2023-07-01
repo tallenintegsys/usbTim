@@ -23,31 +23,31 @@ def main() -> int:
         print("usage: {} [array name]".format(sys.argv[0]))
         exit(1)
     v.arrayName = os.path.splitext(sys.argv[1])[0]
-    f = open("{}.txt".format(v.arrayName))
-    esc = False
-    while 1:
-        # read by character
-        char = f.read(1)
-        if esc:
-            if char == "e":
-                v.p("\\033") # esc
-                esc = False
+    with open("{}.txt".format(v.arrayName)) as f:
+        esc = False
+        while 1:
+            # read by character
+            char = f.read(1)
+            if esc:
+                if char == "e":
+                    v.p("\\033") # esc
+                    esc = False
+                    continue
+                if char == "f":
+                    v.p("\\014") # FF = EOF
+                    esc = False
+                    break
+            if char == "\\":
+                esc = True
                 continue
-            if char == "f":
-                v.p("\\014") # FF = EOF
-                esc = False
+            if char == "\n":
+                v.p("\\015")
+                v.p("\\012")
+                continue
+            if not char:
                 break
-        if char == "\\":
-            esc = True
-            continue
-        if char == "\n":
-            v.p("\\015")
-            v.p("\\012")
-            continue
-        if not char:
-            break
-
-        v.p(char)
+    
+            v.p(char)
     f.close()
     return 0
 
